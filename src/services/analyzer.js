@@ -1,8 +1,6 @@
 const logger = require('../lib/logger');
 const repos = require('../../config/repos.json');
 
-const AGENT_USERNAME = process.env.AGENT_USERNAME || 'copilot';
-
 function getFieldText(value) {
   if (value == null) return '';
   if (typeof value === 'string') return value;
@@ -16,31 +14,34 @@ function getFieldText(value) {
 }
 
 function analyze(fields) {
-  const assignedTo = getFieldText(fields['System.AssignedTo']);
-
-  if (!assignedTo.toLowerCase().includes(AGENT_USERNAME.toLowerCase())) {
-    const reason = `assignedTo izin verilen kullanıcıyı içermiyor (assignedTo: "${assignedTo}")`;
-    logger.info('Koşul sağlanmadı', { reason });
-    return { shouldTrigger: false, reason };
-  }
-
   const tagsRaw = getFieldText(fields['System.Tags']);
-  const aiTag = tagsRaw.split(';').map(t => t.trim().toLowerCase()).find(t => t.startsWith('ai-agent:'));
+  const tagList = tagsRaw.split(';').map(t => t.trim()).filter(Boolean);
+  const aiTag = tagList.find(t => t.toLowerCase().startsWith('ai-agent:'));
 
   if (!aiTag) {
-    const reason = `"ai-agent:<repo>" tag bulunamadı (tags: "${tagsRaw}")`;
+    const validRepos = Object.keys(repos).join(', ') || '(repos.json boş)';
+    const reason = `"ai-agent:<repo>" formatında bir etiket bulunamadı. Mevcut etiketler: "${tagsRaw || '(boş)'}". Tanımlı repolar: ${validRepos}`;
     logger.info('Koşul sağlanmadı', { reason });
-    return { shouldTrigger: false, reason };
+    return { shouldTrigger: false, code: 'TAG_MISSING', reason };
   }
 
-  const repoName = aiTag.split(':')[1];
-  if (!repoName || !repos[repoName]) {
-    const reason = `Bilinmeyen repo: "${repoName}"`;
+  const repoName = aiTag.slice('ai-agent:'.length).trim().toLowerCase();
+
+  if (!repoName) {
+    const validRepos = Object.keys(repos).join(', ') || '(repos.json boş)';
+    const reason = `"ai-agent:" etiketinde repo adı belirtilmemiş. Doğru kullanım: "ai-agent:<repo>". Tanımlı repolar: ${validRepos}`;
     logger.info('Koşul sağlanmadı', { reason });
-    return { shouldTrigger: false, reason };
+    return { shouldTrigger: false, code: 'REPO_EMPTY', reason };
   }
 
-  return { shouldTrigger: true, repoName, repoConfig: repos[repoName], reason: 'Tüm koşullar sağlandı' };
+  if (!repos[repoName]) {
+    const validRepos = Object.keys(repos).join(', ') || '(repos.json boş)';
+    const reason = `"${repoName}" repo'su tanımlı değil. Tanımlı repolar: ${validRepos}`;
+    logger.info('Koşul sağlanmadı', { reason });
+    return { shouldTrigger: false, code: 'REPO_UNKNOWN', reason };
+  }
+
+  return { shouldTrigger: true, code: 'OK', repoName, repoConfig: repos[repoName], reason: 'Tüm koşullar sağlandı' };
 }
 
 module.exports = { analyze };

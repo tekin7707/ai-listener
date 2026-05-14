@@ -20,11 +20,11 @@ router.post('/', async (req, res) => {
 
   const { eventType, resource } = req.body || {};
   const workItemId = resource?.workItemId || resource?.revision?.id;
-  const fields = resource?.fields;
+  const fields = resource?.fields || {};
 
-  if (eventType !== 'workitem.updated' || !workItemId || !fields) {
-    logger.warn('Geçersiz payload', { eventType, workItemId });
-    return res.status(400).json({ error: 'Bad Request' });
+  if (!workItemId) {
+    logger.warn('Geçersiz payload: workItemId eksik', { eventType });
+    return res.status(400).json({ error: 'Bad Request', reason: 'workItemId zorunlu' });
   }
 
   logger.info('Webhook alındı', { workItemId, eventType });
@@ -37,9 +37,9 @@ router.post('/', async (req, res) => {
     return res.status(500).json({ error: 'Work item fetch failed' });
   }
 
-  const { shouldTrigger, reason, repoName, repoConfig } = analyze(workItemFields);
+  const { shouldTrigger, code, reason, repoName, repoConfig } = analyze(workItemFields);
   if (!shouldTrigger) {
-    return res.status(200).json({ status: 'skipped', reason });
+    return res.status(200).json({ status: 'skipped', code, reason });
   }
 
   const lockAcquired = await acquireLock(workItemId);

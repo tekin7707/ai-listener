@@ -37,7 +37,6 @@ nano .env
 #   AZURE_DEVOPS_PAT=<production PAT — yeni belirle>
 #   WEBHOOK_USER=<production basic auth user>
 #   WEBHOOK_PASSWORD=<production basic auth password>
-#   AGENT_USERNAME=<>
 #   TARGET_USERS=<>
 
 cp config/repos.example.json config/repos.json
