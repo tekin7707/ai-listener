@@ -1,0 +1,12 @@
+{
+  "example-repo-1": {
+    "project": "your_project_name",
+    "pipelineId": "0",
+    "pat": "your_azure_devops_pat_here"
+  },
+  "example-repo-2": {
+    "project": "your_project_name",
+    "pipelineId": "0",
+    "pat": "your_azure_devops_pat_here"
+  }
+}

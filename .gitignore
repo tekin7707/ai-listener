@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Environment variables - credentials içerir, asla commit etme
+.env
+.env.test
+.env.local
+.env.*.local
+secrets.env
+*.secret
+*.secrets
+
+# Runtime config with credentials - kullan config/repos.example.json'ı şablon olarak
+config/repos.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/

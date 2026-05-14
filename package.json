@@ -1,0 +1,17 @@
+{
+  "name": "ado-webhook-dispatcher",
+  "version": "1.0.0",
+  "description": "Azure DevOps workitem.updated webhook → Pipeline trigger",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1",
+    "winston": "^3.13.0"
+  }
+}
