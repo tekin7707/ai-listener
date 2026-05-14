@@ -11,6 +11,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate VPS secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+        run: |
+          set -euo pipefail
+
+          [[ -n "$VPS_HOST" ]] || { echo "Missing GitHub Actions secret: VPS_HOST" >&2; exit 1; }
+          [[ -n "$VPS_USER" ]] || { echo "Missing GitHub Actions secret: VPS_USER" >&2; exit 1; }
+          [[ -n "$VPS_SSH_KEY" ]] || { echo "Missing GitHub Actions secret: VPS_SSH_KEY" >&2; exit 1; }
+          [[ -n "$VPS_PORT" ]] || { echo "Missing GitHub Actions secret: VPS_PORT" >&2; exit 1; }
+
       - name: Ensure target directories exist
         uses: appleboy/ssh-action@v1.0.3
         with:
