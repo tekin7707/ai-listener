@@ -25,7 +25,8 @@ function analyze(fields) {
     return { shouldTrigger: false, code: 'TAG_MISSING', reason };
   }
 
-  const repoName = aiTag.slice('ai-agent:'.length).trim().toLowerCase();
+  // Format: "ai-agent:<repo>" veya "ai-agent:<repo>:<model>" — sadece repo'yu al
+  const repoName = aiTag.slice('ai-agent:'.length).split(':')[0].trim().toLowerCase();
 
   if (!repoName) {
     const validRepos = Object.keys(repos).join(', ') || '(repos.json boş)';
