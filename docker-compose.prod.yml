@@ -1,0 +1,15 @@
+services:
+  redis:
+    networks:
+      - floxo-net
+
+  listener:
+    ports: !reset []
+    networks:
+      - floxo-net
+      - edge_web
+
+networks:
+  edge_web:
+    external: true
+    name: edge_web

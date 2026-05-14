@@ -8,10 +8,7 @@ async function fetchWorkItem(workItemId) {
   const url = `${ORG}/_apis/wit/workitems/${workItemId}?api-version=7.1`;
   const auth = Buffer.from(`:${PAT}`).toString('base64');
 
-  logger.info('Work item çekiliyor', {
-    workItemId,
-    curl: `curl -u ":${PAT}" "${url}"`
-  });
+  logger.info('Work item çekiliyor', { workItemId, url });
 
   const response = await axios.get(url, {
     headers: {
