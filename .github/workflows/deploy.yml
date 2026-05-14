@@ -1,0 +1,65 @@
+name: Deploy ai-listener to VPS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure target directories exist
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            mkdir -p /home/deploy/hetzner01/ai-listener/config
+            mkdir -p /home/deploy/hetzner01/ai-listener/src
+            docker network inspect edge_web >/dev/null 2>&1 || docker network create edge_web
+
+      - name: Sync runtime files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: "Dockerfile,docker-compose.yml,docker-compose.prod.yml,package.json,package-lock.json,.dockerignore,.env.example,src,config"
+          target: "/home/deploy/hetzner01/ai-listener"
+          rm: false
+          overwrite: true
+          strip_components: 0
+          tar_dereference: true
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+
+            cd /home/deploy/hetzner01/ai-listener
+            rm -rf .git
+
+            if [ ! -f .env ]; then
+              echo ".env bulunamadı. Önce production değerleriyle /home/deploy/hetzner01/ai-listener/.env oluştur." >&2
+              exit 1
+            fi
+
+            if [ ! -f config/repos.json ]; then
+              echo "config/repos.json bulunamadı. Önce production değerleriyle oluştur." >&2
+              exit 1
+            fi
+
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
