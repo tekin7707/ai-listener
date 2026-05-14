@@ -57,10 +57,11 @@ Health check. `pong` döner. Edge nginx için kullanılabilir.
 
 ## Tetikleme Koşulları
 
-Aşağıdaki **tek** koşul sağlanmalı:
+Aşağıdaki **iki** koşul aynı anda sağlanmalı (AND):
 
 | Alan | Kural |
 |---|---|
+| `System.State` | `WEBHOOK_TRIGGER_STATE` env'i (varsayılan: `To Do`) ile eşleşmeli (case-insensitive). Board template'lerinin state transition kuralları, doğrudan `Backlog → In Progress` gibi geçişleri reddedebildiği için bu kontrolü erken yapıyoruz. |
 | `System.Tags` | `ai-agent:<repo>` veya `ai-agent:<repo>:<model>` formatında en az bir etiket bulunmalı. `<repo>`, [config/repos.json](config/repos.json)'da tanımlı olmalı. |
 
 `<model>` (opsiyonel) ai-listener tarafında **kullanılmaz** — Azure pipeline parametresine geçirilmez.
@@ -76,6 +77,7 @@ Tüm yanıtlar JSON.
 | HTTP | `status` | `code` | Anlam |
 |---|---|---|---|
 | 200 | `triggered` | `OK` | Pipeline tetiklendi. Body: `{ status, workItemId, repoName, runId }` |
+| 200 | `skipped` | `STATE_NOT_ALLOWED` | Work item beklenen state'te değil (varsayılan `To Do`) |
 | 200 | `skipped` | `TAG_MISSING` | `ai-agent:<repo>` etiketi yok |
 | 200 | `skipped` | `REPO_EMPTY` | `ai-agent:` var ama repo adı boş |
 | 200 | `skipped` | `REPO_UNKNOWN` | Tag'deki repo `repos.json`'da yok |

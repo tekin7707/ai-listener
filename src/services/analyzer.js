@@ -1,6 +1,8 @@
 const logger = require('../lib/logger');
 const repos = require('../../config/repos.json');
 
+const TRIGGER_STATE = process.env.WEBHOOK_TRIGGER_STATE || 'To Do';
+
 function getFieldText(value) {
   if (value == null) return '';
   if (typeof value === 'string') return value;
@@ -14,6 +16,13 @@ function getFieldText(value) {
 }
 
 function analyze(fields) {
+  const state = getFieldText(fields['System.State']);
+  if (state.toLowerCase() !== TRIGGER_STATE.toLowerCase()) {
+    const reason = `Work item "${TRIGGER_STATE}" state'inde olmalı, mevcut state: "${state || '(boş)'}". Önce work item'ı "${TRIGGER_STATE}" durumuna alıp tekrar deneyin.`;
+    logger.info('Koşul sağlanmadı', { reason });
+    return { shouldTrigger: false, code: 'STATE_NOT_ALLOWED', reason };
+  }
+
   const tagsRaw = getFieldText(fields['System.Tags']);
   const tagList = tagsRaw.split(';').map(t => t.trim()).filter(Boolean);
   const aiTag = tagList.find(t => t.toLowerCase().startsWith('ai-agent:'));
