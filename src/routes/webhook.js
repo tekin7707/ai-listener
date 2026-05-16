@@ -4,6 +4,7 @@ const { analyze } = require('../services/analyzer');
 const { trigger } = require('../services/pipeline');
 const { fetchWorkItem } = require('../services/workitem');
 const logger = require('../lib/logger');
+const { t } = require('../lib/i18n');
 
 const BASIC_AUTH = Buffer.from(
   `${process.env.WEBHOOK_USER}:${process.env.WEBHOOK_PASSWORD}`
@@ -14,8 +15,8 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   const auth = req.headers['authorization'];
   if (!auth || auth !== `Basic ${BASIC_AUTH}`) {
-    logger.warn('Geçersiz kimlik doğrulama', { ip: req.ip });
-    return res.status(401).json({ error: 'Unauthorized' });
+    logger.warn(t('webhook.log_unauthorized'), { ip: req.ip });
+    return res.status(401).json({ error: t('webhook.err_unauthorized') });
   }
 
   const { eventType, resource } = req.body || {};
@@ -23,18 +24,18 @@ router.post('/', async (req, res) => {
   const fields = resource?.fields || {};
 
   if (!workItemId) {
-    logger.warn('Geçersiz payload: workItemId eksik', { eventType });
-    return res.status(400).json({ error: 'Bad Request', reason: 'workItemId zorunlu' });
+    logger.warn(t('webhook.log_invalid_payload'), { eventType });
+    return res.status(400).json({ error: t('webhook.err_bad_request'), reason: t('webhook.err_workitemid_required') });
   }
 
-  logger.info('Webhook alındı', { workItemId, eventType });
+  logger.info(t('webhook.log_received'), { workItemId, eventType });
 
   let workItemFields;
   try {
     workItemFields = await fetchWorkItem(workItemId);
   } catch (err) {
-    logger.error('Work item çekilemedi', { workItemId, message: err.message });
-    return res.status(500).json({ error: 'Work item fetch failed' });
+    logger.error(t('webhook.log_fetch_failed'), { workItemId, message: err.message });
+    return res.status(500).json({ error: t('webhook.err_workitem_fetch') });
   }
 
   const { shouldTrigger, code, reason, repoName, repoConfig } = analyze(workItemFields);
@@ -44,7 +45,7 @@ router.post('/', async (req, res) => {
 
   const lockAcquired = await acquireLock(workItemId);
   if (!lockAcquired) {
-    logger.info('Lock meşgul, debounced', { workItemId });
+    logger.info(t('webhook.log_debounced'), { workItemId });
     return res.status(200).json({ status: 'debounced', workItemId });
   }
 
@@ -56,7 +57,7 @@ router.post('/', async (req, res) => {
 
     const cooldown = await getCooldown(workItemId);
     if (cooldown) {
-      logger.info('Cooldown aktif, atlandı', { workItemId, runId: cooldown.id });
+      logger.info(t('webhook.log_cooldown_active'), { workItemId, runId: cooldown.id });
       return res.status(200).json({ status: 'cooldown', workItemId, pipelineRunId: cooldown.id });
     }
 
@@ -64,8 +65,8 @@ router.post('/', async (req, res) => {
     await setCooldown(workItemId, run);
     return res.status(200).json({ status: 'triggered', workItemId, repoName, runId: run.id });
   } catch (err) {
-    logger.error('Pipeline tetiklenemedi', { workItemId, message: err.message });
-    return res.status(500).json({ error: 'Pipeline trigger failed' });
+    logger.error(t('webhook.log_pipeline_failed'), { workItemId, message: err.message });
+    return res.status(500).json({ error: t('webhook.err_pipeline_trigger') });
   } finally {
     await releaseLock(workItemId);
   }

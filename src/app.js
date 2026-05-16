@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const logger = require('./lib/logger');
+const { t } = require('./lib/i18n');
 const webhookRouter = require('./routes/webhook');
 
 const app = express();
@@ -21,5 +22,5 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  logger.info(`Servis başladı`, { port: PORT });
+  logger.info(t('app.log_started'), { port: PORT });
 });

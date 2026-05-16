@@ -1,7 +1,10 @@
 const logger = require('../lib/logger');
-const repos = require('../../config/repos.json');
+const { t } = require('../lib/i18n');
+const { REPO_INDEX } = require('../lib/repoIndex');
 
 const TRIGGER_STATE = process.env.WEBHOOK_TRIGGER_STATE || 'To Do';
+const TAG_PREFIX = process.env.AI_AGENT_TAG_PREFIX || 'ai-agent';
+const TRIGGER_TAG_PREFIX = `${TAG_PREFIX}:`;
 
 function getFieldText(value) {
   if (value == null) return '';
@@ -18,40 +21,37 @@ function getFieldText(value) {
 function analyze(fields) {
   const state = getFieldText(fields['System.State']);
   if (state.toLowerCase() !== TRIGGER_STATE.toLowerCase()) {
-    const reason = `Work item "${TRIGGER_STATE}" state'inde olmalı, mevcut state: "${state || '(boş)'}". Önce work item'ı "${TRIGGER_STATE}" durumuna alıp tekrar deneyin.`;
-    logger.info('Koşul sağlanmadı', { reason });
+    const reason = t('analyzer.state_not_allowed', { trigger: TRIGGER_STATE, state: state || '(empty)' });
+    logger.info(t('analyzer.log_condition_failed'), { reason });
     return { shouldTrigger: false, code: 'STATE_NOT_ALLOWED', reason };
   }
 
   const tagsRaw = getFieldText(fields['System.Tags']);
-  const tagList = tagsRaw.split(';').map(t => t.trim()).filter(Boolean);
-  const aiTag = tagList.find(t => t.toLowerCase().startsWith('ai-agent:'));
+  const tagList = tagsRaw.split(';').map(s => s.trim()).filter(Boolean);
+  const aiTag = tagList.find(s => s.toLowerCase().startsWith(TRIGGER_TAG_PREFIX.toLowerCase()));
+  const knownRepos = Object.keys(REPO_INDEX).join(', ') || '(projects.json empty)';
 
   if (!aiTag) {
-    const validRepos = Object.keys(repos).join(', ') || '(repos.json boş)';
-    const reason = `"ai-agent:<repo>" formatında bir etiket bulunamadı. Mevcut etiketler: "${tagsRaw || '(boş)'}". Tanımlı repolar: ${validRepos}`;
-    logger.info('Koşul sağlanmadı', { reason });
+    const reason = t('analyzer.tag_missing', { prefix: TAG_PREFIX, tags: tagsRaw || '(empty)', repos: knownRepos });
+    logger.info(t('analyzer.log_condition_failed'), { reason });
     return { shouldTrigger: false, code: 'TAG_MISSING', reason };
   }
 
-  // Format: "ai-agent:<repo>" veya "ai-agent:<repo>:<model>" — sadece repo'yu al
-  const repoName = aiTag.slice('ai-agent:'.length).split(':')[0].trim().toLowerCase();
+  const repoName = aiTag.slice(TRIGGER_TAG_PREFIX.length).split(':')[0].trim().toLowerCase();
 
   if (!repoName) {
-    const validRepos = Object.keys(repos).join(', ') || '(repos.json boş)';
-    const reason = `"ai-agent:" etiketinde repo adı belirtilmemiş. Doğru kullanım: "ai-agent:<repo>". Tanımlı repolar: ${validRepos}`;
-    logger.info('Koşul sağlanmadı', { reason });
+    const reason = t('analyzer.repo_empty', { prefix: TAG_PREFIX, repos: knownRepos });
+    logger.info(t('analyzer.log_condition_failed'), { reason });
     return { shouldTrigger: false, code: 'REPO_EMPTY', reason };
   }
 
-  if (!repos[repoName]) {
-    const validRepos = Object.keys(repos).join(', ') || '(repos.json boş)';
-    const reason = `"${repoName}" repo'su tanımlı değil. Tanımlı repolar: ${validRepos}`;
-    logger.info('Koşul sağlanmadı', { reason });
+  if (!REPO_INDEX[repoName]) {
+    const reason = t('analyzer.repo_unknown', { repo: repoName, repos: knownRepos });
+    logger.info(t('analyzer.log_condition_failed'), { reason });
     return { shouldTrigger: false, code: 'REPO_UNKNOWN', reason };
   }
 
-  return { shouldTrigger: true, code: 'OK', repoName, repoConfig: repos[repoName], reason: 'Tüm koşullar sağlandı' };
+  return { shouldTrigger: true, code: 'OK', repoName, repoConfig: REPO_INDEX[repoName], reason: t('analyzer.ok') };
 }
 
 module.exports = { analyze };

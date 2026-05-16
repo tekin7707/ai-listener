@@ -1,0 +1,43 @@
+{
+  "analyzer": {
+    "state_not_allowed": "Work item must be in the \"{trigger}\" state, current state: \"{state}\". Move the work item to \"{trigger}\" and try again.",
+    "tag_missing": "No tag matching the \"{prefix}:<repo>\" format was found. Current tags: \"{tags}\". Known repos: {repos}",
+    "repo_empty": "The \"{prefix}:\" tag has no repo name. Correct usage: \"{prefix}:<repo>\". Known repos: {repos}",
+    "repo_unknown": "Repo \"{repo}\" is not defined. Known repos: {repos}",
+    "ok": "All conditions met",
+    "log_condition_failed": "Condition not met"
+  },
+  "webhook": {
+    "log_unauthorized": "Invalid authentication",
+    "log_invalid_payload": "Invalid payload: workItemId missing",
+    "log_received": "Webhook received",
+    "log_fetch_failed": "Failed to fetch work item",
+    "log_debounced": "Lock busy, debounced",
+    "log_cooldown_active": "Cooldown active, skipped",
+    "log_pipeline_failed": "Pipeline trigger failed",
+    "err_unauthorized": "Unauthorized",
+    "err_bad_request": "Bad Request",
+    "err_workitemid_required": "workItemId is required",
+    "err_workitem_fetch": "Work item fetch failed",
+    "err_pipeline_trigger": "Pipeline trigger failed"
+  },
+  "pipeline": {
+    "log_triggering": "Triggering pipeline",
+    "log_triggered": "Pipeline triggered",
+    "log_ado_error": "Azure DevOps API error"
+  },
+  "workitem": {
+    "log_fetching": "Fetching work item"
+  },
+  "deduplicator": {
+    "log_duplicate": "Duplicate skipped",
+    "log_lock_error": "Redis lock error",
+    "log_lock_release_error": "Redis lock release error",
+    "log_dedup_error": "Redis error, dedup check skipped",
+    "log_cooldown_read_error": "Redis cooldown read error",
+    "log_cooldown_write_error": "Redis cooldown write error"
+  },
+  "app": {
+    "log_started": "Service started"
+  }
+}

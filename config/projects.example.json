@@ -1,0 +1,15 @@
+{
+  "MyProjectA": {
+    "triggerPat": "<azure-devops-pat-with-build-execute-on-MyProjectA>",
+    "repos": [
+      { "repo": "example-repo-1", "pipelineId": "0" },
+      { "repo": "example-repo-2", "pipelineId": "0" }
+    ]
+  },
+  "MyProjectB": {
+    "triggerPat": "<azure-devops-pat-with-build-execute-on-MyProjectB>",
+    "repos": [
+      { "repo": "another-repo", "pipelineId": "0" }
+    ]
+  }
+}

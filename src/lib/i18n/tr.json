@@ -1,0 +1,43 @@
+{
+  "analyzer": {
+    "state_not_allowed": "Work item \"{trigger}\" state'inde olmalı, mevcut state: \"{state}\". Önce work item'ı \"{trigger}\" durumuna alıp tekrar deneyin.",
+    "tag_missing": "\"{prefix}:<repo>\" formatında bir etiket bulunamadı. Mevcut etiketler: \"{tags}\". Tanımlı repolar: {repos}",
+    "repo_empty": "\"{prefix}:\" etiketinde repo adı belirtilmemiş. Doğru kullanım: \"{prefix}:<repo>\". Tanımlı repolar: {repos}",
+    "repo_unknown": "\"{repo}\" repo'su tanımlı değil. Tanımlı repolar: {repos}",
+    "ok": "Tüm koşullar sağlandı",
+    "log_condition_failed": "Koşul sağlanmadı"
+  },
+  "webhook": {
+    "log_unauthorized": "Geçersiz kimlik doğrulama",
+    "log_invalid_payload": "Geçersiz payload: workItemId eksik",
+    "log_received": "Webhook alındı",
+    "log_fetch_failed": "Work item çekilemedi",
+    "log_debounced": "Lock meşgul, debounced",
+    "log_cooldown_active": "Cooldown aktif, atlandı",
+    "log_pipeline_failed": "Pipeline tetiklenemedi",
+    "err_unauthorized": "Unauthorized",
+    "err_bad_request": "Bad Request",
+    "err_workitemid_required": "workItemId zorunlu",
+    "err_workitem_fetch": "Work item fetch failed",
+    "err_pipeline_trigger": "Pipeline trigger failed"
+  },
+  "pipeline": {
+    "log_triggering": "Pipeline tetikleniyor",
+    "log_triggered": "Pipeline tetiklendi",
+    "log_ado_error": "Azure DevOps API hatası"
+  },
+  "workitem": {
+    "log_fetching": "Work item çekiliyor"
+  },
+  "deduplicator": {
+    "log_duplicate": "Duplicate atlandı",
+    "log_lock_error": "Redis lock hatası",
+    "log_lock_release_error": "Redis lock release hatası",
+    "log_dedup_error": "Redis hatası, duplicate kontrolü atlandı",
+    "log_cooldown_read_error": "Redis cooldown okuma hatası",
+    "log_cooldown_write_error": "Redis cooldown yazma hatası"
+  },
+  "app": {
+    "log_started": "Servis başladı"
+  }
+}

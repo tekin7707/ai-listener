@@ -10,8 +10,8 @@ secrets.env
 *.secret
 *.secrets
 
-# Runtime config with credentials - kullan config/repos.example.json'ı şablon olarak
-config/repos.json
+# Runtime config — see config/projects.example.json for the schema
+config/projects.json
 
 # Logs
 logs/
